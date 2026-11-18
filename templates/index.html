@@ -15,6 +15,35 @@
       <p id="summary" aria-live="polite">正在加载任务…</p>
     </header>
 
+    <section class="account-panel" aria-label="账号">
+      {% if account %}
+        <form id="account-form" class="account-signed-in" method="post" action="{{ url_for('logout') }}">
+          <p>已登录 <strong>{{ account.username }}</strong></p>
+          <button type="submit" class="account-secondary">退出登录</button>
+        </form>
+      {% else %}
+        <h2>登录账号</h2>
+        <p>在其他浏览器登录同一个账号，就能看到这些任务。</p>
+        <form id="account-form" class="account-form" method="post" action="{{ url_for('login') }}">
+          <div class="account-fields">
+            <label for="account-username">账号
+              <input id="account-username" name="username" autocomplete="username" autocapitalize="none"
+                     spellcheck="false" minlength="3" maxlength="32" placeholder="例如 gin-study" required>
+            </label>
+            <label for="account-password">密码
+              <input id="account-password" name="password" type="password" autocomplete="current-password"
+                     minlength="8" maxlength="128" placeholder="至少 8 个字符" required>
+            </label>
+          </div>
+          <div class="account-actions">
+            <button type="submit" class="account-primary">登录</button>
+            <button type="submit" class="account-secondary" formaction="{{ url_for('register') }}">注册并登录</button>
+          </div>
+        </form>
+      {% endif %}
+      <p id="account-error" class="error" role="alert" hidden></p>
+    </section>
+
     <section class="task-panel" aria-label="任务清单">
       <form id="add-task" class="add-task">
         <label for="task-title">新任务</label>
@@ -36,7 +65,7 @@
         <noscript><p class="empty">请在浏览器中启用 JavaScript 来使用清单。</p></noscript>
       </div>
     </section>
-    <p class="device-note">此清单与当前浏览器关联。</p>
+    <p class="device-note">{% if account %}任务保存在当前账号下。{% else %}当前显示的是此浏览器的访客清单。{% endif %}</p>
   </main>
 </body>
 </html>

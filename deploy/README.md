@@ -14,10 +14,9 @@ sudo ss -ltnp '( sport = :80 or sport = :443 or sport = :18080 )'
 
 ### 在腾讯云控制台上传
 
-从实例详情点「登录」，进入 OrcaTerm 网页终端。如果手上已有 `gin-task-list.tar.gz`，可以直接上传。需要重新打包时，在 Mac 的终端运行下面两行，部署包会保存在「下载」文件夹。[腾讯云 OrcaTerm 登录说明](https://cloud.tencent.com/document/product/1665/97739/)
+从实例详情点「登录」，进入 OrcaTerm 网页终端。如果手上已有 `gin-task-list.tar.gz`，可以直接上传。需要重新打包时，在 Mac 的终端进入 `NiTaskList` 项目文件夹，再运行下面的命令。部署包会保存在「下载」文件夹。[腾讯云 OrcaTerm 登录说明](https://cloud.tencent.com/document/product/1665/97739/)
 
 ```bash
-cd /Users/gin/Documents/ChatGPT/GinCode
 COPYFILE_DISABLE=1 tar -czf ~/Downloads/gin-task-list.tar.gz app.py requirements.txt templates static deploy
 ```
 
@@ -30,10 +29,9 @@ tar -xzf ~/gin-task-list.tar.gz -C ~/gin-task-list-upload
 
 ### 从 Mac 的终端上传
 
-把第二行里的 `用户名` 和 `公网IP` 换成自己服务器的信息。SSH 是登录服务器终端的方式，`scp` 复用同一种登录方式传文件。第一次连接时，先核对 SSH 提示的服务器指纹，再确认。
+在 Mac 的终端进入 `NiTaskList` 项目文件夹。把第一行里的 `用户名` 和 `公网IP` 换成自己服务器的信息。SSH 是登录服务器终端的方式，`scp` 复用同一种登录方式传文件。第一次连接时，先核对 SSH 提示的服务器指纹，再确认。
 
 ```bash
-cd /Users/gin/Documents/ChatGPT/GinCode
 SERVER='用户名@公网IP'
 ssh "$SERVER" 'mkdir -p ~/gin-task-list-upload'
 scp -r app.py requirements.txt templates static deploy "$SERVER:gin-task-list-upload/"
@@ -87,7 +85,7 @@ ssh -N -o ExitOnForwardFailure=yes -L 127.0.0.1:18080:127.0.0.1:18080 用户名@
 
 ## 4. 配置公网入口
 
-确认服务器可以对外提供网站后，使用域名作为正式入口。先把域名的 A 记录指向服务器公网 IPv4。允许网站使用公网 IP 做演示时，也可以把 `WEB_HOST` 设成公网 IPv4，使用 HTTP 和练习数据。
+在网站入口启用 HTTPS 后再开放注册和登录，保护传输中的密码和登录凭证。使用域名作为正式入口时，先把域名的 A 记录指向服务器公网 IPv4。受限的公网 IP 测试也可以申请适用于该 IP 的证书。IP 证书有效期较短，启用时同时配置自动续期。[Let's Encrypt IP 证书说明](https://letsencrypt.org/2026/03/11/shorter-certs-certbot/)
 
 如果服务器已经由 1Panel 的 OpenResty 管理网站，在 1Panel 里选择「网站 → 创建网站 → 反向代理」，绑定本站域名，目标设为 `http://127.0.0.1:18080`。这个目标要求 OpenResty 与应用共用主机网络。再在站点的 HTTPS 设置里选择对应域名的证书。部署到已存在的网站路径时，使用下文的路径配置。[1Panel 反向代理说明](https://awesome.1panel.cn/archives/openresty-nginx-1panel-intro)
 

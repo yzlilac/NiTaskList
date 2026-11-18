@@ -7,6 +7,8 @@ const summary = document.querySelector("#summary");
 const empty = document.querySelector("#empty");
 const errorNotice = document.querySelector("#error");
 const filters = document.querySelectorAll("[data-filter]");
+const accountForm = document.querySelector("#account-form");
+const accountError = document.querySelector("#account-error");
 
 let tasks = [];
 let filter = "all";
@@ -57,6 +59,7 @@ function taskRow(task) {
   const checkbox = document.createElement("input");
   checkbox.type = "checkbox";
   checkbox.checked = task.done;
+  checkbox.disabled = saving;
   const title = document.createElement("span");
   title.textContent = task.title;
   label.append(checkbox, title);
@@ -74,6 +77,7 @@ function taskRow(task) {
   const remove = document.createElement("button");
   remove.className = "remove-task";
   remove.type = "button";
+  remove.disabled = saving;
   remove.textContent = "删除";
   remove.setAttribute("aria-label", `删除任务：${task.title}`);
   remove.addEventListener("click", async () => {
@@ -89,18 +93,22 @@ function taskRow(task) {
   return row;
 }
 
+function setSaving(pending) {
+  saving = pending;
+  addButton.disabled = pending || !ready;
+  for (const control of taskList.querySelectorAll("button, input")) control.disabled = pending;
+  for (const button of accountForm?.querySelectorAll("button") ?? []) button.disabled = pending;
+}
+
 async function save(change) {
-  saving = true;
-  addButton.disabled = true;
-  for (const control of taskList.querySelectorAll("button, input")) control.disabled = true;
+  setSaving(true);
   showError("");
   try {
     await change();
   } catch (error) {
     showError(error.message);
   } finally {
-    saving = false;
-    addButton.disabled = false;
+    setSaving(false);
     render();
   }
 }
@@ -131,12 +139,28 @@ for (const button of filters) {
   });
 }
 
+accountForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (saving) return;
+  const path = event.submitter?.getAttribute("formaction") || accountForm.action;
+  setSaving(true);
+  accountError.hidden = true;
+  try {
+    await api(path, "POST", Object.fromEntries(new FormData(accountForm)));
+    window.location.reload();
+  } catch (error) {
+    accountError.textContent = error.message;
+    accountError.hidden = false;
+    setSaving(false);
+  }
+});
+
 async function load() {
   try {
     tasks = await api(taskApi);
     ready = true;
     titleInput.disabled = false;
-    addButton.disabled = false;
+    addButton.disabled = saving;
     render();
   } catch {
     summary.textContent = "暂时无法加载任务";

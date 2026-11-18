@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f4ec">
+  <title>小任务清单</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='tasks.js') }}" defer></script>
+</head>
+<body>
+  <main class="workspace">
+    <header class="page-header">
+      <h1>小任务清单</h1>
+      <p id="summary" aria-live="polite">正在加载任务…</p>
+    </header>
+
+    <section class="task-panel" aria-label="任务清单">
+      <form id="add-task" class="add-task">
+        <label for="task-title">新任务</label>
+        <div class="form-row">
+          <input id="task-title" name="title" placeholder="例如：完成第一个软件项目"
+                 maxlength="{{ max_title_length }}" autocomplete="off" required disabled>
+          <button type="submit" id="add-button" disabled>添加任务</button>
+        </div>
+      </form>
+      <div class="task-content">
+        <div class="filters" role="group" aria-label="筛选任务">
+          <button type="button" data-filter="all" aria-pressed="true">全部</button>
+          <button type="button" data-filter="open" aria-pressed="false">待完成</button>
+          <button type="button" data-filter="done" aria-pressed="false">已完成</button>
+        </div>
+        <p id="error" class="error" role="alert" hidden></p>
+        <p id="empty" class="empty" hidden></p>
+        <ul id="tasks" data-api-url="{{ url_for('list_tasks') }}" aria-label="任务" hidden></ul>
+        <noscript><p class="empty">请在浏览器中启用 JavaScript 来使用清单。</p></noscript>
+      </div>
+    </section>
+    <p class="device-note">此清单与当前浏览器关联。</p>
+  </main>
+</body>
+</html>

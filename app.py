@@ -111,7 +111,15 @@ def create_app():
 
     @app.get("/")
     def home():
-        return render_template("index.html", max_title_length=MAX_TITLE_LENGTH, account=current_account())
+        account = current_account()
+        guest_list = cookie_token(COOKIE_NAME) if account is not None else None
+        guest_task_count = db().execute(
+            "SELECT COUNT(*) FROM tasks WHERE list_id = ?", (guest_list,)
+        ).fetchone()[0] if guest_list else 0
+        return render_template(
+            "index.html", max_title_length=MAX_TITLE_LENGTH,
+            account=account, guest_task_count=guest_task_count,
+        )
 
     @app.post("/api/register")
     def register():
@@ -157,6 +165,27 @@ def create_app():
         response = jsonify({"status": "ok"})
         set_cookie(response, SESSION_COOKIE, "", 0)
         return response
+
+    @app.post("/api/import-guest-tasks")
+    def import_guest_tasks():
+        account = current_account()
+        if account is None:
+            return {"error": "请先登录需要接收访客任务的账号。"}, 401
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return {"error": "请通过任务清单页面导入。"}, 400
+        if payload.get("account") != account["username"]:
+            return {"error": "登录账号已变化，请刷新页面后再导入。"}, 409
+
+        guest_list = cookie_token(COOKIE_NAME)
+        if guest_list is None:
+            return {"imported": 0}
+        with db() as connection:
+            cursor = connection.execute(
+                "UPDATE tasks SET list_id = ? WHERE list_id = ?",
+                (current_list_id(), guest_list),
+            )
+        return {"imported": cursor.rowcount}
 
     @app.get("/healthz")
     def health():

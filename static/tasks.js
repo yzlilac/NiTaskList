@@ -7,7 +7,7 @@ const summary = document.querySelector("#summary");
 const empty = document.querySelector("#empty");
 const errorNotice = document.querySelector("#error");
 const filters = document.querySelectorAll("[data-filter]");
-const accountForm = document.querySelector("#account-form");
+const accountForms = document.querySelectorAll("#account-form, #guest-import-form");
 const accountError = document.querySelector("#account-error");
 
 let tasks = [];
@@ -97,7 +97,7 @@ function setSaving(pending) {
   saving = pending;
   addButton.disabled = pending || !ready;
   for (const control of taskList.querySelectorAll("button, input")) control.disabled = pending;
-  for (const button of accountForm?.querySelectorAll("button") ?? []) button.disabled = pending;
+  for (const button of document.querySelectorAll(".account-panel button")) button.disabled = pending;
 }
 
 async function save(change) {
@@ -139,21 +139,23 @@ for (const button of filters) {
   });
 }
 
-accountForm?.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  if (saving) return;
-  const path = event.submitter?.getAttribute("formaction") || accountForm.action;
-  setSaving(true);
-  accountError.hidden = true;
-  try {
-    await api(path, "POST", Object.fromEntries(new FormData(accountForm)));
-    window.location.reload();
-  } catch (error) {
-    accountError.textContent = error.message;
-    accountError.hidden = false;
-    setSaving(false);
-  }
-});
+for (const accountForm of accountForms) {
+  accountForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (saving) return;
+    const path = event.submitter?.getAttribute("formaction") || accountForm.action;
+    setSaving(true);
+    accountError.hidden = true;
+    try {
+      await api(path, "POST", Object.fromEntries(new FormData(accountForm)));
+      window.location.reload();
+    } catch (error) {
+      accountError.textContent = error.message;
+      accountError.hidden = false;
+      setSaving(false);
+    }
+  });
+}
 
 async function load() {
   try {

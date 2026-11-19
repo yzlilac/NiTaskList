@@ -51,6 +51,8 @@ h1 {
 .account-actions { margin-top: .7rem; }
 .account-signed-in { align-items: center; justify-content: space-between; }
 .account-signed-in strong { margin-left: .35rem; }
+.account-guest-import { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; margin-top: .8rem; padding-top: .8rem; border-top: 1px solid var(--line); }
+.account-guest-import p { flex: 1 1 16rem; color: var(--muted); font-size: .9rem; }
 .account-primary, .account-secondary { padding: .55rem .75rem; border: 1px solid transparent; border-radius: .55rem; font-weight: 650; }
 .account-primary { background: var(--green); color: white; }
 .account-primary:hover:enabled { background: #173f32; }

@@ -21,9 +21,16 @@
           <p>已登录 <strong>{{ account.username }}</strong></p>
           <button type="submit" class="account-secondary">退出登录</button>
         </form>
+        {% if guest_task_count %}
+          <form class="account-guest-import" id="guest-import-form" method="post" action="{{ url_for('import_guest_tasks') }}">
+            <p>此浏览器里有 {{ guest_task_count }} 条访客任务。你可以把它们移到 <strong>{{ account.username }}</strong> 的清单。</p>
+            <input type="hidden" name="account" value="{{ account.username }}">
+            <button type="submit" class="account-secondary">导入访客任务</button>
+          </form>
+        {% endif %}
       {% else %}
         <h2>登录账号</h2>
-        <p>在其他浏览器登录同一个账号，就能看到这些任务。</p>
+        <p>登录后，你可以查看账号清单，也可以选择导入此浏览器的访客任务。</p>
         <form id="account-form" class="account-form" method="post" action="{{ url_for('login') }}">
           <div class="account-fields">
             <label for="account-username">账号
